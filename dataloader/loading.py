@@ -65,6 +65,73 @@ class BUDataset(Dataset):
         return self.size
 
 
+# Add the dataload for the Chaoyang Dataset. Copied from own dataset loader with mini modification.
+class Chaoyang(Dataset):
+    def __init__(self, root='', train=True):
+        self.train = train
+        self.trainsize=(224,224)
+
+        if train:
+            self.transform_center = transforms.Compose([
+                trans.CropCenterSquare(),
+                transforms.Resize(self.trainsize),
+                trans.RandomHorizontalFlip(),
+                trans.RandomRotation(30),
+                # trans.adjust_light(),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
+        else:
+            self.transform_center = transforms.Compose([
+                trans.CropCenterSquare(),
+                transforms.Resize(self.trainsize),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
+
+        if not self.train:
+            imgs = []
+            labels = []
+            json_path = os.path.join(root, 'json', 'test.json')
+            with open(json_path, 'r') as f:
+                load_list = json.load(f)
+                for i in range(len(load_list)):
+                    img_path = os.path.join(root, load_list[i]["name"])
+                    imgs.append(img_path)
+                    labels.append(load_list[i]["label"])
+            self.test_data, self.test_labels = np.array(imgs), np.array(labels)
+        else:  # is_train = True => Train.
+            imgs = []
+            labels = []
+            json_path = os.path.join(root, 'json', 'train.json')
+            with open(json_path, 'r') as f:
+                load_list = json.load(f)
+                for i in range(len(load_list)):
+                    img_path = os.path.join(root, load_list[i]["name"])
+                    imgs.append(img_path)
+                    labels.append(load_list[i]["label"])
+            self.train_data, self.train_labels = np.array(imgs), np.array(labels)
+
+    def __getitem__(self, idx):
+        # In the function of building_dataset, the transform has been set following the is_train.
+        if self.train:
+            img, label = self.train_data[idx], self.train_labels[idx]
+            img = Image.open(img).convert('RGB')
+            img = self.transform_center(img)
+            return img, label
+        else:
+            img, label = self.test_data[idx], self.test_labels[idx]
+            img = Image.open(img).convert('RGB')
+            img = self.transform_center(img)
+            return img, label
+
+    def __len__(self):
+        if self.train:
+            return len(self.train_data)
+        else:
+            return len(self.test_data)
+
+
 class APTOSDataset(Dataset):
     def __init__(self, data_list, train=True):
         self.trainsize = (224,224)

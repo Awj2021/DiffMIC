@@ -144,7 +144,6 @@ class Diffusion(object):
             batch_size=config.training.batch_size,
             shuffle=True,
             num_workers=config.data.num_workers,
-            #sampler=sampler
         )
         test_loader = data.DataLoader(
             test_dataset,
@@ -582,5 +581,4 @@ class Diffusion(object):
                                     f"[Test:] Average accuracy: {acc_avg}, Average Kappa: {kappa_avg}, F1: {f1_avg}"
                             )
                     )
-
 

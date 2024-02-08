@@ -105,6 +105,9 @@ def get_dataset(args, config):
     elif config.data.dataset == "ISIC":
         train_dataset = ISICDataset(data_list=config.data.traindata, train=True)
         test_dataset = ISICDataset(data_list=config.data.testdata, train=False)
+    elif config.data.dataset == "chaoyang":
+        train_dataset = Chaoyang(root=config.data.traindata, train=True)
+        test_dataset = Chaoyang(root=config.data.traindata, train=False)
     else:
         raise NotImplementedError(
             "Options: toy (classification of two Gaussian), MNIST, FashionMNIST, CIFAR10.")
